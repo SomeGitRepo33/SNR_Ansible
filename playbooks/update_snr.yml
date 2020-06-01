@@ -1,0 +1,157 @@
+---
+- name: Update FirmWare on SNR switches
+  hosts: SNR
+  gather_facts: false
+  connection: network_cli
+
+  vars:
+    - tftp_server: "10.30.88.222"
+
+    - act_2965_bootrom: "7.2.40"
+    - S2965_bootrom_file: "2965/S2965_7.2.40_boot.rom"
+    - act_2965_fw: "7.0.3.5(R0241.0342)"
+    - S2965_fw_file: "2965/S2965_7.0.3.5(R0241.0342)_nos.img"
+
+    - act_2982_bootrom: "7.2.41"
+    - S2982_bootrom_file: "2982/S2982G-24T_7.2.41_boot.rom"
+    - act_2982_fw: "7.0.3.5(R0241.0342)"
+    - S2982_fw_file: "2982/S2982-24T_7.0.3.5(R0241.0342)_nos.img"
+
+    - act_2985_bootrom: "7.2.40"
+    - S2985_bootrom_file: "2985/S2985G_7.2.40_boot.rom"
+    - act_2985_fw: "7.0.3.5(R0241.0343)"
+    - S2985_fw_file: "2985/S2985G_7.0.3.5(R0241.0343)_nos.img"
+
+    - act_2990_bootrom: "7.1.41"
+    - S2990_bootrom_file: "2990/S2990G_7.1.41_boot.rom"
+    - act_2990_fw: "7.0.3.5(R0102.0303)"
+    - S2990_fw_file: "2990/S2990G_7.0.3.5(R0102.0303)_nos.img"
+
+    - act_2995_bootrom: "7.5.21"
+    - S2995_bootrom_file: "2995/S2995G_7.5.21_boot.rom"
+    - act_2995_fw: "7.5.3.2(R0004.0256)"
+    - S2995_fw_file: "2995/S2995G_7.5.3.2(R0004.0256)_nos.img"
+
+
+  tasks:
+
+# BootROM Update
+
+    - name: Get system INFO
+      ios_command:
+        commands: show version
+      register: sh_ver
+
+    - name: Parse output
+      set_fact:
+        switch_facts: '{{sh_ver.stdout[0] | parse_cli_textfsm("templates/show.textFSM") }}'
+
+    - name: Print INFO
+      debug:
+        msg: "{{switch_facts}}"
+
+    - include_role:
+        name: update_bootrom
+      vars:
+        boot_rom: "{{act_2965_bootrom}}"
+        bootrom_file: "{{S2965_bootrom_file}}"
+      when:
+        - '"S2965" in switch_facts[0]["Model"]'
+        - 'act_2965_bootrom != switch_facts[0]["BootROMVersion"]'
+
+    - include_role:
+        name: update_bootrom
+      vars:
+        boot_rom: "{{act_2982_bootrom}}"
+        bootrom_file: "{{S2982_bootrom_file}}"
+      when:
+        - '"S2982" in switch_facts[0]["Model"]'
+        - 'act_2982_bootrom != switch_facts[0]["BootROMVersion"]'
+
+    - include_role:
+        name: update_bootrom
+      vars:
+        boot_rom: "{{act_2985_bootrom}}"
+        bootrom_file: "{{S2985_bootrom_file}}"
+      when:
+        - '"S2985" in switch_facts[0]["Model"]'
+        - 'act_2985_bootrom != switch_facts[0]["BootROMVersion"]'
+
+    - include_role:
+        name: update_bootrom
+      vars:
+        boot_rom: "{{act_2990_bootrom}}"
+        bootrom_file: "{{S2990_bootrom_file}}"
+      when:
+        - '"S2990" in switch_facts[0]["Model"]'
+        - 'act_2990_bootrom != switch_facts[0]["BootROMVersion"]'
+
+    - include_role:
+        name: update_bootrom
+      vars:
+        boot_rom: "{{act_2995_bootrom}}"
+        bootrom_file: "{{S2995_bootrom_file}}"
+      when:
+        - '"S2995" in switch_facts[0]["Model"]'
+        - 'act_2995_bootrom != switch_facts[0]["BootROMVersion"]'
+
+# FW Update
+
+    - name: Get system INFO
+      ios_command:
+        commands: show version
+      register: sh_ver
+
+    - name: Parse output
+      set_fact:
+        switch_facts: '{{sh_ver.stdout[0] | parse_cli_textfsm("templates/show.textFSM") }}'
+
+    - include_role:
+        name: update_firmware
+      vars:
+        fw_version: "{{act_2965_fw}}"
+        fw_file: "{{S2965_fw_file}}"
+      when:
+        - '"S2965" in switch_facts[0]["Model"]'
+        - 'act_2965_bootrom == switch_facts[0]["BootROMVersion"]'
+        - 'act_2965_fw != switch_facts[0]["SoftwareVersion"]'
+
+    - include_role:
+        name: update_firmware
+      vars:
+        fw_version: "{{act_2982_fw}}"
+        fw_file: "{{S2982_fw_file}}"
+      when:
+        - '"S2982" in switch_facts[0]["Model"]'
+        - 'act_2982_bootrom == switch_facts[0]["BootROMVersion"]'
+        - 'act_2982_fw != switch_facts[0]["SoftwareVersion"]'
+
+    - include_role:
+        name: update_firmware
+      vars:
+        fw_version: "{{act_2985_fw}}"
+        fw_file: "{{S2985_fw_file}}"
+      when:
+        - '"S2985" in switch_facts[0]["Model"]'
+        - 'act_2985_bootrom == switch_facts[0]["BootROMVersion"]'
+        - 'act_2985_fw != switch_facts[0]["SoftwareVersion"]'
+
+    - include_role:
+        name: update_firmware
+      vars:
+        fw_version: "{{act_2990_fw}}"
+        fw_file: "{{S2990_fw_file}}"
+      when:
+        - '"S2990" in switch_facts[0]["Model"]'
+        - 'act_2990_bootrom == switch_facts[0]["BootROMVersion"]'
+        - 'act_2990_fw != switch_facts[0]["SoftwareVersion"]'
+
+    - include_role:
+        name: update_firmware
+      vars:
+        fw_version: "{{act_2995_fw}}"
+        fw_file: "{{S2995_fw_file}}"
+      when:
+        - '"S2995" in switch_facts[0]["Model"]'
+        - 'act_2995_bootrom == switch_facts[0]["BootROMVersion"]'
+        - 'act_2995_fw != switch_facts[0]["SoftwareVersion"]'
