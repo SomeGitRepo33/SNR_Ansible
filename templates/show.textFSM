@@ -1,0 +1,18 @@
+Value Model (\S+)
+Value Uptime (.*)
+Value SoftwareVersion (\S+)
+Value BootROMVersion (\S+)
+Value CPUMAC (\S+)
+Value VlanMAC (\S+)
+Value SN (\S+)
+Value HardWareVersion (\S+)
+
+Start
+  ^\s*${Model} Device
+  ^\s*SoftWare.*Version ${SoftwareVersion}
+  ^\s*BootRom Version ${BootROMVersion}
+  ^\s*HardWare Version ${HardWareVersion}
+  ^\s*Uptime is ${Uptime}
+  ^\s*CPU Mac ${CPUMAC}
+  ^\s*Vlan MAC ${VlanMAC}
+  ^\s*Serial No.:${SN}
