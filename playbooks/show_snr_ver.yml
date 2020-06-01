@@ -1,0 +1,75 @@
+---
+- name: Get some info
+  hosts: SNR
+  gather_facts: false
+  connection: network_cli
+
+  tasks:
+    - name: Show ver
+      ios_command:
+        commands: show version
+      register: sh_ver
+
+    - name: Parse output
+      set_fact:
+        switch_facts: '{{sh_ver.stdout[0] | parse_cli_textfsm("templates/show.textFSM") }}'
+
+    - name: S2962
+      debug:
+        msg:
+          - 'Model is {{switch_facts[0]["Model"]}}'
+          - 'HardWare version is {{switch_facts[0]["HardWareVersion"]}}'
+          - 'BootROM is {{switch_facts[0]["BootROMVersion"]}}'
+          - 'FirmWare is {{switch_facts[0]["SoftwareVersion"]}}'
+      when:
+        - '"S2962" in switch_facts[0]["Model"]'
+
+    - name: S2965
+      debug:
+        msg:
+          - 'Model is {{switch_facts[0]["Model"]}}'
+          - 'HardWare version is {{switch_facts[0]["HardWareVersion"]}}'
+          - 'BootROM is {{switch_facts[0]["BootROMVersion"]}}'
+          - 'FirmWare is {{switch_facts[0]["SoftwareVersion"]}}'
+      when:
+        - '"S2965" in switch_facts[0]["Model"]'
+
+    - name: S2982
+      debug:
+        msg:
+          - 'Model is {{switch_facts[0]["Model"]}}'
+          - 'HardWare version is {{switch_facts[0]["HardWareVersion"]}}'
+          - 'BootROM is {{switch_facts[0]["BootROMVersion"]}}'
+          - 'FirmWare is {{switch_facts[0]["SoftwareVersion"]}}'
+      when:
+        - '"S2982" in switch_facts[0]["Model"]'
+
+    - name: S2985
+      debug:
+        msg:
+          - 'Model is {{switch_facts[0]["Model"]}}'
+          - 'HardWare version is {{switch_facts[0]["HardWareVersion"]}}'
+          - 'BootROM is {{switch_facts[0]["BootROMVersion"]}}'
+          - 'FirmWare is {{switch_facts[0]["SoftwareVersion"]}}'
+      when:
+        - '"S2985" in switch_facts[0]["Model"]'
+        
+    - name: S2990
+      debug:
+        msg:
+          - 'Model is {{switch_facts[0]["Model"]}}'
+          - 'HardWare version is {{switch_facts[0]["HardWareVersion"]}}'
+          - 'BootROM is {{switch_facts[0]["BootROMVersion"]}}'
+          - 'FirmWare is {{switch_facts[0]["SoftwareVersion"]}}'
+      when:
+        - '"S2990" in switch_facts[0]["Model"]'
+
+    - name: S2995
+      debug:
+        msg:
+          - 'Model is {{switch_facts[0]["Model"]}}'
+          - 'HardWare version is {{switch_facts[0]["HardWareVersion"]}}'
+          - 'BootROM is {{switch_facts[0]["BootROMVersion"]}}'
+          - 'FirmWare is {{switch_facts[0]["SoftwareVersion"]}}'
+      when:
+        - '"S2995" in switch_facts[0]["Model"]'
