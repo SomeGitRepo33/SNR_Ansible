@@ -1,0 +1,58 @@
+---
+# tasks file for update_bootrom
+- name: Print vars
+  debug:
+    msg:
+      - 'Target BootROM version for model is: {{boot_rom}}'
+      - 'Prepared update command: copy tftp://{{tftp_server}}/{{bootrom_file}} boot.rom'
+
+- name: Upgrading BootROM
+  ios_command:
+    commands:
+      - command: "copy tftp://{{tftp_server}}/{{bootrom_file}} boot.rom"
+        prompt: '\[Y/N\]:'
+        answer: "y"
+  vars:
+    ansible_command_timeout: 300
+  register: cmd_res
+
+- name: Check upgrade result
+  when:
+    cmd_res.stdout[0].find("Write ok.") == -1
+  fail:
+    msg: Upgrade fail {{ cmd_res.stdout}}
+
+- name: Switch reboot
+  ios_command:
+    commands:
+      - command: "reload"
+        prompt: '\[Y/N\]'
+        answer: "y"
+  ignore_errors: yes
+
+- name: WAITING FOR SWITCH TO RETURN FROM REBOOT
+  wait_for:
+    host: "{{inventory_hostname}}"
+    port: 22
+    delay: 60
+    timeout: 600
+  delegate_to: localhost
+
+- name: Show ver
+  ios_command:
+    commands: show version
+  register: sh_ver
+
+- name: Parse output
+  set_fact:
+    switch_facts: '{{sh_ver.stdout[0] | parse_cli_textfsm("templates/show.textFSM") }}'
+
+- name: Check INFO
+  debug:
+    msg:
+      - 'Model is {{switch_facts[0]["Model"]}}'
+      - 'HardWare version is {{switch_facts[0]["HardWareVersion"]}}'
+      - 'BootROM version is {{switch_facts[0]["BootROMVersion"]}}'
+      - 'Target BootROM version is: {{boot_rom}}'
+      - 'FirmWare is {{switch_facts[0]["SoftwareVersion"]}}'
+      - 'Uptime is {{switch_facts[0]["Uptime"]}}'
