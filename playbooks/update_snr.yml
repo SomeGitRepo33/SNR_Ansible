@@ -5,7 +5,7 @@
   connection: network_cli
 
   vars:
-    - tftp_server: "10.30.88.222"
+    - tftp_server: "10.10.10.10"
 
     - act_2965_bootrom: "7.2.40"
     - S2965_bootrom_file: "2965/S2965_7.2.40_boot.rom"
