@@ -1,0 +1,58 @@
+---
+# tasks file for update_firmware
+- name: Print vars
+  debug:
+    msg:
+      - 'Target FirmWare version for model is: {{fw_version}}'
+      - 'Prepared update command: copy tftp://{{tftp_server}}/{{fw_file}} nos.img'
+
+- name: Upgrading FirmWare
+  ios_command:
+    commands:
+      - command: "copy tftp://{{tftp_server}}/{{fw_file}} nos.img"
+        prompt: '\[Y/N\]:'
+        answer: "y"
+  vars:
+    ansible_command_timeout: 300
+  register: cmd_res
+
+- name: Check upgrade result
+  when:
+    cmd_res.stdout[0].find("Write ok.") == -1
+  fail:
+    msg: Upgrade fail {{ cmd_res.stdout}}
+
+- name: Switch reboot
+  ios_command:
+    commands:
+      - command: "reload"
+        prompt: '\[Y/N\]'
+        answer: "y"
+  ignore_errors: yes
+
+- name: WAITING FOR SWITCH TO RETURN FROM REBOOT
+  wait_for:
+    host: "{{inventory_hostname}}"
+    port: 22
+    delay: 60
+    timeout: 600
+  delegate_to: localhost
+
+- name: Show ver
+  ios_command:
+    commands: show version
+  register: sh_ver
+
+- name: Parse output
+  set_fact:
+    switch_facts: '{{sh_ver.stdout[0] | parse_cli_textfsm("templates/show.textFSM") }}'
+
+- name: Check INFO
+  debug:
+    msg:
+      - 'Model is {{switch_facts[0]["Model"]}}'
+      - 'HardWare version is {{switch_facts[0]["HardWareVersion"]}}'
+      - 'BootROM version is {{switch_facts[0]["BootROMVersion"]}}'
+      - 'FirmWare is {{switch_facts[0]["SoftwareVersion"]}}'
+      - 'Target FirmWare version is: {{fw_version}}'
+      - 'Uptime is {{switch_facts[0]["Uptime"]}}'
